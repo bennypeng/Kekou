@@ -83,14 +83,12 @@ class EsdkController extends Controller
 
     //  Oppo渠道比较特殊，需要做中转
     public function oppoNotify(Request $request) {
-        $paramStr = http_build_query($request->all());
-
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, config('constants.OPPO_NOTIFY_URL'));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $paramStr);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $request->all());
         curl_exec($ch);
         curl_close($ch);
 
