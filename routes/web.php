@@ -11,6 +11,8 @@
 |
 */
 
-Route::get('/', function () {
-    echo "Hello World!";
-});
+/**
+ * 易接相关接口
+ */
+Route::post('/1sdk/login', 'EsdkController@login');
+Route::get('/1sdk/notify', 'EsdkController@notify');
