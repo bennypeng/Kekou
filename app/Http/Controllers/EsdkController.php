@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class EsdkController extends Controller
 {
@@ -19,8 +20,8 @@ class EsdkController extends Controller
             'uin' => urlencode(filter_input(INPUT_GET, "uin")),
             'sess' => urlencode(filter_input(INPUT_GET, "sess"))
         );
-        $urlQueryData = http_build_query($urlQueryData);
-        $checkLoginUrl = config('constants.CHECK_LOGIN_URL').$urlQueryData;
+        $paramStr = http_build_query($urlQueryData);
+        $checkLoginUrl = config('constants.CHECK_LOGIN_URL').$paramStr;
 
         //  发送请求
         $ch = curl_init();
@@ -39,6 +40,8 @@ class EsdkController extends Controller
                 $ret = "ERROR";
             }
         }
+
+        Log::info("debug", $urlQueryData);
 
         return response($ret)
             ->header('Content-Type', "text/html; charset=utf-8");
@@ -60,15 +63,17 @@ class EsdkController extends Controller
             'uid' => filter_input(INPUT_GET, "uid"),
             'ver' => filter_input(INPUT_GET, "ver")
         );
-        $urlQueryData = http_build_query($urlQueryData);
+        $paramStr = http_build_query($urlQueryData);
         $fromSign = filter_input(INPUT_GET, "sign");
-        $sign = md5($urlQueryData.config('constants.PRIVATE_KEY'));
+        $sign = md5($paramStr.config('constants.PRIVATE_KEY'));
 
         if($fromSign === $sign){
             $ret = "SUCCESS";
         }else{
             $ret = "ERROR";
         }
+
+        Log::info("debug", array_merge($urlQueryData, array("sign" => $fromSign)));
 
         return response($ret)
             ->header('Content-Type', "text/html; charset=utf-8");
