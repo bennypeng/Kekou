@@ -12,6 +12,6 @@ class VerifyCsrfToken extends Middleware
      * @var array
      */
     protected $except = [
-        '/1sdk/login'
+        '/1sdk/login', '/1sdk/oppo/notify'
     ];
 }

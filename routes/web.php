@@ -16,3 +16,4 @@
  */
 Route::post('/1sdk/login', 'EsdkController@login');
 Route::get('/1sdk/notify', 'EsdkController@notify');
+Route::post('/1sdk/oppo/notify', 'EsdkController@oppoNotify');

@@ -49,7 +49,7 @@ class EsdkController extends Controller
 
 
     //  支付验证接口
-    public function notify() {
+    public function notify(Request $request) {
         $urlQueryData = array(
             'app' => filter_input(INPUT_GET, "app"),
             'cbi' => filter_input(INPUT_GET, "cbi"),
@@ -73,9 +73,15 @@ class EsdkController extends Controller
             $ret = "ERROR";
         }
 
+        Log::info("debug", $request->all());
         Log::info("debug", array_merge($urlQueryData, array("sign" => $fromSign)));
 
         return response($ret)
             ->header('Content-Type', "text/html; charset=utf-8");
+    }
+
+    //  Oppo渠道比较特殊，需要做中转
+    public function oppoNotify(Request $request) {
+        Log::info("debug", $request->all());
     }
 }
