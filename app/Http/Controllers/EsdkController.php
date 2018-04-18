@@ -30,6 +30,7 @@ class EsdkController extends Controller
         curl_setopt($ch, CURLOPT_HEADER, 0);
         $result = curl_exec($ch);
         $clientHttpCode = curl_getinfo($ch,CURLINFO_HTTP_CODE);
+        curl_close($ch);
 
         if($clientHttpCode != 200 || $result == null || (is_array($result) && count($result) == 0)){
             $ret = "ERROR";
@@ -82,6 +83,17 @@ class EsdkController extends Controller
 
     //  Oppo渠道比较特殊，需要做中转
     public function oppoNotify(Request $request) {
-        Log::info("debug", $request->all());
+        $paramStr = http_build_query($request->all());
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, config('constants.OPPO_NOTIFY_URL'));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $paramStr);
+        curl_exec($ch);
+        curl_close($ch);
+
+        Log::info("debug-oppo", $request->all());
     }
 }
