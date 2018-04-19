@@ -74,7 +74,7 @@ class EsdkController extends Controller
             $ret = "ERROR";
         }
 
-        Log::info("debug", $request->all());
+        Log::info("debug-all", $request->all());
         Log::info("debug", array_merge($urlQueryData, array("sign" => $fromSign)));
 
         return response($ret)
