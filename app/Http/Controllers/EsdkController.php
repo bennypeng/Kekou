@@ -82,6 +82,7 @@ class EsdkController extends Controller
     }
 
     //  Oppo渠道比较特殊，需要做中转
+    /*
     public function oppoNotify(Request $request) {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, config('constants.OPPO_NOTIFY_URL'));
@@ -94,4 +95,5 @@ class EsdkController extends Controller
 
         Log::info("debug-oppo", $request->all());
     }
+    */
 }
