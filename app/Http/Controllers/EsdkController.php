@@ -49,6 +49,7 @@ class EsdkController extends Controller
                 'ret' => $ret,
                 'list' => [
                     //  此处列出该玩家失败的订单
+                    'skinSuite_1', 'consumeItem_11'
                 ]
             ]);
     }
