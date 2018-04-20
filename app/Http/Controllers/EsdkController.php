@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class EsdkController extends Controller
@@ -49,7 +50,8 @@ class EsdkController extends Controller
                 'ret' => $ret,
                 'list' => [
                     //  此处列出该玩家失败的订单
-                    'skinSuite_1', 'consumeItem_11'
+                    'aaaaa' => 'skinSuite_1',
+                    'bbbbb' => 'consumeItem_11'
                 ]
             ]);
     }
@@ -80,8 +82,13 @@ class EsdkController extends Controller
             $ret = "ERROR";
         }
 
-        Log::info("debug-all", $request->all());
         Log::info("debug", array_merge($urlQueryData, array("sign" => $fromSign)));
+
+        //  数据入库
+        if ($ret == "SUCCESS")
+            DB::insert('INSERT INTO orders(uin, appid, sdkid, extra, fee, ssid, tcd, ver, st, ct, pt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [$urlQueryData['uid'], $urlQueryData['app'], $urlQueryData['sdk'], $urlQueryData['cbi'], $urlQueryData['fee'], $urlQueryData['ssid'],
+                    $urlQueryData['tcd'], $urlQueryData['ver'], $urlQueryData['st'], $urlQueryData['ct'], $urlQueryData['pt']]);
 
         return response($ret)
             ->header('Content-Type', "text/html; charset=utf-8");
