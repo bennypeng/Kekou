@@ -82,7 +82,7 @@ class EsdkController extends Controller
             $ret = "ERROR";
         }
 
-        Log::info("debug", array_merge($urlQueryData, array("sign" => $fromSign)));
+        Log::info("debug", array_merge($urlQueryData, array("sign" => $fromSign, "ret" => $ret)));
 
         //  数据入库
         if ($ret == "SUCCESS")
