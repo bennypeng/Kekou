@@ -44,8 +44,13 @@ class EsdkController extends Controller
 
         Log::info("debug", $urlQueryData);
 
-        return response($ret)
-            ->header('Content-Type', "text/html; charset=utf-8");
+        return response()
+            ->json([
+                'ret' => $ret,
+                'list' => [
+                    //  此处列出该玩家失败的订单
+                ]
+            ]);
     }
 
 
