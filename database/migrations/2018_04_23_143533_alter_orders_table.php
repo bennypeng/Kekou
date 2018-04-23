@@ -15,6 +15,8 @@ class AlterOrdersTable extends Migration
     {
         Schema::table('orders', function (Blueprint $table) {
             $table->unique(['ssid', 'tcd']);
+            $table->index(['uin', 'tcd']);
+            $table->enum('status', ['0', '1'])->default('0')->comment('订单状态')->after('pt');
         });
     }
 

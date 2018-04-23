@@ -43,7 +43,9 @@ class EsdkController extends Controller
             }
         }
 
-        //  数据入库
+        //  需要把原始的SQL查询方式改写为model
+        //  数据入库及查询没有发货的订单
+        $list = [];
         if ($ret == "SUCCESS") {
             $row = DB::table('users')
                 ->where('uin', '=', $urlQueryData['uin'])
@@ -54,6 +56,13 @@ class EsdkController extends Controller
                         'uin' => $urlQueryData['uin'], 'sdkid' => $urlQueryData['sdk'], 'appid' => $urlQueryData['app']
                     ]);
             }
+            if ($row) {
+                $orders = DB::table('orders')
+                    ->whereRaw("uin=? and status=?", [$row->uin, '0'])->get();
+                foreach($orders as $k => $v) {
+                    $list[$v->tcd] = $v->extra;
+                }
+            }
         }
 
         Log::info("debug", $urlQueryData);
@@ -61,11 +70,7 @@ class EsdkController extends Controller
         return response()
             ->json([
                 'ret' => $ret,
-                'list' => [
-                    //  此处列出该玩家失败的订单
-                    'aaaaa' => 'skinSuite_1',
-                    'bbbbb' => 'consumeItem_11'
-                ]
+                'list' => $list
             ]);
     }
 
@@ -119,19 +124,10 @@ class EsdkController extends Controller
             ->header('Content-Type', "text/html; charset=utf-8");
     }
 
-    //  Oppo渠道比较特殊，需要做中转
-    /*
-    public function oppoNotify(Request $request) {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, config('constants.OPPO_NOTIFY_URL'));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $request->all());
-        curl_exec($ch);
-        curl_close($ch);
 
-        Log::info("debug-oppo", $request->all());
+    //  客户端请求发货(只能发一次)
+    public function clientNotify(Request $request) {
+        dd($request->g);
     }
-    */
+
 }
