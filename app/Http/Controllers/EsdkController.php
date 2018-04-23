@@ -119,7 +119,6 @@ class EsdkController extends Controller
             }
         }
 
-
         return response($ret)
             ->header('Content-Type', "text/html; charset=utf-8");
     }
@@ -127,7 +126,20 @@ class EsdkController extends Controller
 
     //  客户端请求发货(只能发一次)
     public function clientNotify(Request $request) {
-        dd($request->g);
+        $uin = $request->get('uin');
+        $ordersStr = $request->get('tcds');
+        if ($uin && $ordersStr) {
+            $ordersArr = explode('_', $ordersStr);
+            DB::table('orders')->whereIn('tcd', $ordersArr)->update(['status' => '1']);
+            $ret = "SUCCESS";
+        } else {
+            $ret = "ERROR";
+        }
+
+        Log::info("debug-clientNotify", $request->all());
+
+        return response($ret)
+            ->header('Content-Type', "text/html; charset=utf-8");
     }
 
 }
