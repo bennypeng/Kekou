@@ -43,6 +43,13 @@ class EsdkController extends Controller
             }
         }
 
+        //  数据入库
+        if ($ret == "SUCCESS") {
+            DB::table('users')->insertGetId([
+                'uin' => $urlQueryData['uin'], 'sdkid' => $urlQueryData['sdk'], 'appid' => $urlQueryData['app']
+            ]);
+        }
+
         Log::info("debug", $urlQueryData);
 
         return response()
