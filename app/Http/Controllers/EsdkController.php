@@ -45,9 +45,15 @@ class EsdkController extends Controller
 
         //  数据入库
         if ($ret == "SUCCESS") {
-            DB::table('users')->insertGetId([
-                'uin' => $urlQueryData['uin'], 'sdkid' => $urlQueryData['sdk'], 'appid' => $urlQueryData['app']
-            ]);
+            $row = DB::table('users')
+                ->where('uin', '=', $urlQueryData['uin'])
+                ->first();
+            if (!$row) {
+                DB::table('users')
+                    ->insertGetId([
+                        'uin' => $urlQueryData['uin'], 'sdkid' => $urlQueryData['sdk'], 'appid' => $urlQueryData['app']
+                    ]);
+            }
         }
 
         Log::info("debug", $urlQueryData);
@@ -92,10 +98,22 @@ class EsdkController extends Controller
         Log::info("debug", array_merge($urlQueryData, array("sign" => $fromSign, "ret" => $ret)));
 
         //  数据入库
-        if ($ret == "SUCCESS")
-            DB::insert('INSERT INTO orders(uin, appid, sdkid, extra, fee, ssid, tcd, ver, st, ct, pt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                [$urlQueryData['uid'], $urlQueryData['app'], $urlQueryData['sdk'], $urlQueryData['cbi'], $urlQueryData['fee'], $urlQueryData['ssid'],
-                    $urlQueryData['tcd'], $urlQueryData['ver'], $urlQueryData['st'], $urlQueryData['ct'], $urlQueryData['pt']]);
+        if ($ret == "SUCCESS") {
+            $row = DB::table('orders')
+                ->where('ssid', '=', $urlQueryData['ssid'], 'and')
+                ->where('tcd', '=', $urlQueryData['tcd'])
+                ->first();
+
+            if (!$row) {
+                DB::insert('INSERT INTO orders(uin, appid, sdkid, extra, fee, ssid, tcd, ver, st, ct, pt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    [
+                        $urlQueryData['uid'], $urlQueryData['app'], $urlQueryData['sdk'], $urlQueryData['cbi'], $urlQueryData['fee'], $urlQueryData['ssid'],
+                        $urlQueryData['tcd'], $urlQueryData['ver'], $urlQueryData['st'], $urlQueryData['ct'], $urlQueryData['pt']
+                    ]
+                );
+            }
+        }
+
 
         return response($ret)
             ->header('Content-Type', "text/html; charset=utf-8");

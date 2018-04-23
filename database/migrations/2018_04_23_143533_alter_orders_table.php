@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AlterChannelsTable extends Migration
+class AlterOrdersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,8 @@ class AlterChannelsTable extends Migration
      */
     public function up()
     {
-        Schema::table('channels', function (Blueprint $table) {
-            $table->unique('sdkid');
-            $table->string('name', 30)->comment('渠道名')->change();
+        Schema::table('orders', function (Blueprint $table) {
+            $table->unique(['ssid', 'tcd']);
         });
     }
 
@@ -26,7 +25,7 @@ class AlterChannelsTable extends Migration
      */
     public function down()
     {
-        Schema::table('channels', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table) {
             //
         });
     }
