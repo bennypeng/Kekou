@@ -72,7 +72,7 @@ class EsdkController extends Controller
             'uid' => filter_input(INPUT_GET, "uid"),
             'ver' => filter_input(INPUT_GET, "ver")
         );
-        $paramStr = http_build_query($urlQueryData);
+        $paramStr = urldecode(http_build_query($urlQueryData));
         $fromSign = filter_input(INPUT_GET, "sign");
         $sign = md5($paramStr.config('constants.PRIVATE_KEY'));
 
