@@ -193,13 +193,20 @@ class EsdkController extends Controller
     public function testTools(Request $request) {
         $tcd = $request->query->get('tcd');
         $uin = $request->query->get('uin');
+        $productId = $request->query->get('cbi');
         $status = $request->query->get('st');
 
         DB::table('orders')->where('tcd', '=', $tcd)->update(['status' => $status]);
+        //  更改订单状态
         Redis::Select(config('constants.ORDERS_DB_INDEX'));
-        Redis::Hset($uin, $tcd, 0);
+        Redis::Hset($uin, $tcd, $status);
 
-        return response("tcd:[".$tcd."] change status to:".$status." success!")
+        //  更改订单商品ID
+        $orderKey = $uin."_".$tcd;
+        if ($productId && Redis::Exists($orderKey))
+            Redis::Hset($orderKey, "extra", $productId);
+
+        return response("change success!")
             ->header('Content-Type', "text/html; charset=utf-8");
         //return view('1sdk/testTools');
     }
