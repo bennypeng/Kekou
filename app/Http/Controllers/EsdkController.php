@@ -189,5 +189,20 @@ class EsdkController extends Controller
             ->header('Content-Type', "text/html; charset=utf-8");
     }
 
+    //  测试工具
+    public function testTools(Request $request) {
+        $tcd = $request->query->get('tcd');
+        $uin = $request->query->get('uin');
+        $status = $request->query->get('st');
+
+        DB::table('orders')->where('tcd', '=', $tcd)->update(['status' => $status]);
+        Redis::Select(config('constants.ORDERS_DB_INDEX'));
+        Redis::Hset($uin, $tcd, 0);
+
+        return response("tcd:[".$tcd."] change status to:".$status." success!")
+            ->header('Content-Type', "text/html; charset=utf-8");
+        //return view('1sdk/testTools');
+    }
+
 
 }
