@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 
 class EsdkController extends Controller
 {
@@ -45,24 +46,51 @@ class EsdkController extends Controller
 
         //  需要把原始的SQL查询方式改写为model
         //  数据入库及查询没有发货的订单
+        $flag = false;
         $list = [];
         if ($ret == "SUCCESS") {
-            $row = DB::table('users')
-                ->where('uin', '=', $urlQueryData['uin'])
-                ->first();
-            if (!$row) {
-                DB::table('users')
-                    ->insertGetId([
-                        'uin' => $urlQueryData['uin'], 'sdkid' => $urlQueryData['sdk'], 'appid' => $urlQueryData['app']
-                    ]);
+            Redis::Select(config('constants.USERS_DB_INDEX'));
+            $key = $urlQueryData['uin']."_".$urlQueryData['sdk'];
+            if (!Redis::Exists($key)) {
+                $row = DB::table('users')
+                    ->where('uin', '=', $urlQueryData['uin'])
+                    ->first();
+                $id = $row->id;
+                if (!$row) {
+                    $id = DB::table('users')
+                        ->insertGetId([
+                            'uin' => $urlQueryData['uin'], 'sdkid' => $urlQueryData['sdk'], 'appid' => $urlQueryData['app']
+                        ]);
+                }
+                Redis::Hmset($key, [
+                    "id"    => $id,
+                    "uin"   => $urlQueryData['uin'],
+                    "sdkid" => $urlQueryData['sdk'],
+                    "appid" => $urlQueryData['app'],
+                ]);
+                Redis::Expire($key, 86400*7);
+                $flag = true;
+            } else {
+                $flag = true;
             }
-            if ($row) {
-                $orders = DB::table('orders')
-                    ->whereRaw("uin=? and status=?", [$row->uin, '0'])->get();
-                foreach($orders as $k => $v) {
-                    $list[$v->tcd] = $v->extra;
+
+            //  查询未发货订单
+            if ($flag) {
+                $orderKey = $urlQueryData['uin'];
+                Redis::Select(config('constants.ORDERS_DB_INDEX'));
+                if (Redis::Exists($orderKey)) {
+                    $orderIds = Redis::Hkeys($orderKey);
+                    foreach ($orderIds as $v) {
+                        $orderInfoKey = $urlQueryData['uin']."_".$v;
+                        list($tcd, $extra) = Redis::Hmget($orderInfoKey, ['tcd', 'extra']);
+                        $list[] = array(
+                            'orderId' => $tcd,
+                            'productId' => $extra,
+                        );
+                    }
                 }
             }
+
         }
 
         Log::info("debug", $urlQueryData);
@@ -94,28 +122,39 @@ class EsdkController extends Controller
         $fromSign = filter_input(INPUT_GET, "sign");
         $sign = md5($paramStr.config('constants.PRIVATE_KEY'));
 
-        if($fromSign === $sign){
-            $ret = "SUCCESS";
-        }else{
-            $ret = "ERROR";
-        }
+        $ret = $fromSign === $sign ? "SUCCESS" : "ERROR";
 
         Log::info("debug", array_merge($urlQueryData, array("sign" => $fromSign, "ret" => $ret)));
 
         //  数据入库
         if ($ret == "SUCCESS") {
-            $row = DB::table('orders')
-                ->where('ssid', '=', $urlQueryData['ssid'], 'and')
-                ->where('tcd', '=', $urlQueryData['tcd'])
-                ->first();
-
-            if (!$row) {
+            $key = $urlQueryData['uid']."_".$urlQueryData['tcd'];
+            Redis::Select(config('constants.ORDERS_DB_INDEX'));
+            if (!Redis::Exists($key)) {
                 DB::insert('INSERT INTO orders(uin, appid, sdkid, extra, fee, ssid, tcd, ver, st, ct, pt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                     [
                         $urlQueryData['uid'], $urlQueryData['app'], $urlQueryData['sdk'], $urlQueryData['cbi'], $urlQueryData['fee'], $urlQueryData['ssid'],
                         $urlQueryData['tcd'], $urlQueryData['ver'], $urlQueryData['st'], $urlQueryData['ct'], $urlQueryData['pt']
                     ]
                 );
+                //  缓存订单详情
+                Redis::Hmset($key, [
+                    "uin"    => $urlQueryData['uid'],
+                    "appid"   => $urlQueryData['app'],
+                    "sdkid" => $urlQueryData['sdk'],
+                    "extra" => $urlQueryData['cbi'],
+                    "fee"    => $urlQueryData['fee'],
+                    "ssid"   => $urlQueryData['ssid'],
+                    "tcd" => $urlQueryData['tcd'],
+                    "ver" => $urlQueryData['ver'],
+                    "st"   => $urlQueryData['st'],
+                    "ct" => $urlQueryData['ct'],
+                    "pt" => $urlQueryData['pt'],
+                ]);
+                Redis::Expire($key, 86400*7);
+
+                //  缓存用户未发货订单号
+                Redis::Hset($urlQueryData['uid'], $urlQueryData['tcd'], 0);
             }
         }
 
@@ -131,6 +170,13 @@ class EsdkController extends Controller
         if ($uin && $ordersStr) {
             $ordersArr = explode('_', $ordersStr);
             DB::table('orders')->whereIn('tcd', $ordersArr)->update(['status' => '1']);
+
+            Redis::Select(config('constants.ORDERS_DB_INDEX'));
+            $orderKey = $uin;
+            foreach($ordersArr as $v) {
+                Redis::Hdel($orderKey, $v);
+            }
+
             $ret = "SUCCESS";
         } else {
             $ret = "ERROR";
@@ -141,5 +187,6 @@ class EsdkController extends Controller
         return response($ret)
             ->header('Content-Type', "text/html; charset=utf-8");
     }
+
 
 }
