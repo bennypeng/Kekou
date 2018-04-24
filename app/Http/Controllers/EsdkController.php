@@ -55,12 +55,13 @@ class EsdkController extends Controller
                 $row = DB::table('users')
                     ->where('uin', '=', $urlQueryData['uin'])
                     ->first();
-                $id = $row->id;
                 if (!$row) {
                     $id = DB::table('users')
                         ->insertGetId([
                             'uin' => $urlQueryData['uin'], 'sdkid' => $urlQueryData['sdk'], 'appid' => $urlQueryData['app']
                         ]);
+                } else {
+                    $id = $row->id;
                 }
                 Redis::Hmset($key, [
                     "id"    => $id,
