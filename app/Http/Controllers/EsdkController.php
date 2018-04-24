@@ -208,7 +208,6 @@ class EsdkController extends Controller
 
         return response("change success!")
             ->header('Content-Type', "text/html; charset=utf-8");
-        //return view('1sdk/testTools');
     }
 
 
