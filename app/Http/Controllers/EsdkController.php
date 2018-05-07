@@ -99,7 +99,8 @@ class EsdkController extends Controller
         return response()
             ->json([
                 'ret' => $ret,
-                'list' => $list
+                'list' => $list,
+                'totalGold' => 0
             ]);
     }
 
