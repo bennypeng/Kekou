@@ -76,6 +76,7 @@ class EsdkController extends Controller
                 Redis::Expire($key, 86400*7);
                 $flag = true;
             } else {
+				$coin = Redis::Hget($key, "coin");
                 $flag = true;
             }
 
@@ -217,4 +218,5 @@ class EsdkController extends Controller
 
 
 }
+
 
