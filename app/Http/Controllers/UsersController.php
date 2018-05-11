@@ -55,10 +55,10 @@ class UsersController extends Controller
                 //$userkey = $uin."_".$urlQueryData['sdk'];
                 $userkey = $uin;
                 Redis::Select(config('constants.USERS_DB_INDEX'));
-                Redis::Hmset($userkey, [
-                    "coin"  => $userCoin
-                ]);
-
+                if (Redis::Exists($userkey))
+                    Redis::Hmset($userkey, [
+                        "coin"  => $userCoin
+                    ]);
                 $ret = "SUCCESS";
             } else {
                 //  重复请求
