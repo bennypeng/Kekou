@@ -51,6 +51,14 @@ class UsersController extends Controller
                 Redis::set($key, 1);
                 Redis::Expire($key, 86400*7);
 
+                //  修改用户缓存
+                //$userkey = $uin."_".$urlQueryData['sdk'];
+                $userkey = $uin;
+                Redis::Select(config('constants.USERS_DB_INDEX'));
+                Redis::Hmset($userkey, [
+                    "coin"  => $userCoin
+                ]);
+
                 $ret = "SUCCESS";
             } else {
                 //  重复请求
@@ -66,3 +74,4 @@ class UsersController extends Controller
     }
 
 }
+

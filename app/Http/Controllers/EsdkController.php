@@ -48,9 +48,11 @@ class EsdkController extends Controller
         //  数据入库及查询没有发货的订单
         $flag = false;
         $list = [];
+        $coin = 0;
         if ($ret == "SUCCESS") {
             Redis::Select(config('constants.USERS_DB_INDEX'));
-            $key = $urlQueryData['uin']."_".$urlQueryData['sdk'];
+            //$key = $urlQueryData['uin']."_".$urlQueryData['sdk'];
+            $key = $urlQueryData['uin'];
             if (!Redis::Exists($key)) {
                 $row = DB::table('users')
                     ->where('uin', '=', $urlQueryData['uin'])
@@ -62,9 +64,11 @@ class EsdkController extends Controller
                         ]);
                 } else {
                     $id = $row->id;
+                    $coin = $row->coin;
                 }
                 Redis::Hmset($key, [
                     "id"    => $id,
+                    "coin"  => $coin,
                     "uin"   => $urlQueryData['uin'],
                     "sdkid" => $urlQueryData['sdk'],
                     "appid" => $urlQueryData['app'],
@@ -100,7 +104,7 @@ class EsdkController extends Controller
             ->json([
                 'ret' => $ret,
                 'list' => $list,
-                'totalGold' => 0
+                'totalGold' => $coin
             ]);
     }
 
@@ -213,3 +217,4 @@ class EsdkController extends Controller
 
 
 }
+
