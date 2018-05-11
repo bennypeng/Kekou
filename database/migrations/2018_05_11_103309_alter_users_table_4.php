@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AlterUsersTable extends Migration
+class AlterUsersTable4 extends Migration
 {
     /**
      * Run the migrations.
@@ -14,12 +14,8 @@ class AlterUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            if (Schema::hasColumn('users', 'uid'))
-                $table->dropColumn('uid');
-
-            $table->unique('uin');
-            $statement = "ALTER TABLE users AUTO_INCREMENT = 10000";
-            DB::unprepared($statement);
+            //
+	    $table->string('uin', 100)->comment('渠道用户ID')->change();
         });
     }
 
