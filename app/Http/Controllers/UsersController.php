@@ -30,7 +30,7 @@ class UsersController extends Controller
 
         $ret = $fromSign === $sign ? "SUCCESS" : "ERROR";
 
-        Log::info("debug", array_merge($urlQueryData, array("sign" => $fromSign, "ret" => $ret)));
+        Log::info("debug", array_merge($urlQueryData, array("sign" => $fromSign, "serverSign" => $sign, "ret" => $ret)));
 
         $userInfo = DB::table('users')
             ->where('uin', $uin)
