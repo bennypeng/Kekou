@@ -12,6 +12,11 @@
 */
 
 /**
+ * 日志接口
+ */
+Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
+
+/**
  * 易接相关接口
  */
 Route::post('/1sdk/login', 'EsdkController@login');
