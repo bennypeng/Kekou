@@ -44,6 +44,8 @@ class EsdkController extends Controller
             }
         }
 
+        Log::info("debug-curl", array_merge($urlQueryData, array("clientHttpCode" => $clientHttpCode, "result" => $result)));
+
         //  需要把原始的SQL查询方式改写为model
         //  数据入库及查询没有发货的订单
         $flag = false;
