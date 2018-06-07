@@ -178,7 +178,7 @@ class EsdkController extends Controller
         $ordersStr = $request->get('tcds');
         if ($uin && $ordersStr) {
             $ordersArr = explode('_', $ordersStr);
-            DB::table('orders')->whereIn('tcd', $ordersArr)->update(['status' => '1']);
+            $res = DB::table('orders')->whereIn('tcd', $ordersArr)->update(['status' => '1']);
 
             Redis::Select(config('constants.ORDERS_DB_INDEX'));
             $orderKey = $uin;
@@ -186,7 +186,7 @@ class EsdkController extends Controller
                 Redis::Hdel($orderKey, $v);
             }
 
-            $ret = "SUCCESS";
+            $ret = $res ? "SUCCESS" : "ERROR";
         } else {
             $ret = "ERROR";
         }
