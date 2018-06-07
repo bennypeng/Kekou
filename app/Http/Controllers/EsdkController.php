@@ -186,7 +186,7 @@ class EsdkController extends Controller
                 Redis::Hdel($orderKey, $v);
             }
 
-            $ret = $res ? "SUCCESS" : "ERROR";
+            $ret = $res ? "SUCCESS" : "NOORDER";
         } else {
             $ret = "ERROR";
         }
