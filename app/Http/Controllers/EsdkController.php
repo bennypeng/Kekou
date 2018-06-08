@@ -191,7 +191,7 @@ class EsdkController extends Controller
             $ret = "ERROR";
         }
 
-        Log::info("debug-clientNotify", $request->all());
+        Log::info("debug-clientNotify", array_merge($request->all(), array('ret' => $ret)));
 
         return response($ret)
             ->header('Content-Type', "text/html; charset=utf-8");
